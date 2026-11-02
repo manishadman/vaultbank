@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch src/server.js",
-    "start": "node src/server.js",
+    "start": "prisma migrate deploy && node src/server.js",
     "db:migrate": "prisma migrate deploy",
     "db:dev": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "db:seed:demo": "SEED_ALLOW=true prisma db seed",
     "db:reset": "prisma migrate reset --force",
     "test": "NODE_ENV=test mocha --timeout 30000 \"tests/**/*.test.js\"",
     "lint": "eslint src tests prisma",
@@ -28,6 +29,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "pdfkit": "^0.17.1",
+    "prisma": "^6.6.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -35,7 +37,6 @@
     "eslint": "^9.25.0",
     "globals": "^16.0.0",
     "mocha": "^11.1.0",
-    "prisma": "^6.6.0",
     "supertest": "^7.1.0"
   }
 }

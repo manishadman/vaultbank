@@ -40,13 +40,23 @@ The refresh cookie path is `/api/v1/auth`, `SameSite=Lax`, `HttpOnly`. The brows
 
 ## Render
 
-`render.yaml` describes one free web service and one Postgres database. The service builds the React app and the API serves `frontend/dist` on the same host, so the refresh cookie stays on that site.
+`render.yaml` describes one free web service and one free Postgres database. The service builds the React app, and the API serves `frontend/dist` on the same host so the refresh cookie stays on that site.
 
 Open this link while signed in to Render, then approve the blueprint:
 
 https://render.com/deploy?repo=https://github.com/manishadman/vaultbank
 
-Render generates the two JWT secrets. `SEED_ALLOW=true` loads the demonstration customers after each deploy. The public URL is printed on the service page. Demo sign-in uses the emails in the README and the default seed passwords.
+`npm start` runs `prisma migrate deploy` and starts the server only if that command exits 0. Render generates the two JWT secrets. Seeding does not run on deploy.
+
+Free web services cannot run a one-off shell job. Seed once from your own machine with the database's external URL from the Render dashboard:
+
+```bash
+DATABASE_URL="postgresql://..." SEED_ALLOW=true npm run db:seed:demo -w backend
+```
+
+`db:seed:demo` is the only command that sets `SEED_ALLOW`. The plain `db:seed` command still refuses to run when `NODE_ENV=production`.
+
+The free web service sleeps after about 15 minutes without traffic and shares 750 instance hours per month. The free Postgres plan is available: 256 MB RAM, 1 GB storage, one database per workspace, and no backups. It expires 30 days after creation. Render then keeps it for a 14-day grace period and deletes it unless you upgrade. The smallest paid database is about $6 per month. The smallest always-on web instance is about $7 per month.
 
 ## What this document does not include
 
