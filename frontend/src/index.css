@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+.dark { color-scheme: dark; }
+
+body {
+  @apply bg-paper text-ink-950 antialiased dark:bg-ink-950 dark:text-mint-50;
+}
+
+:focus-visible {
+  outline: 2px solid #b8894a;
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  background: white;
+  padding: 0.5rem 1rem;
+  z-index: 50;
+}
+.skip-link:focus { top: 1rem; }

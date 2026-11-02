@@ -1,0 +1,56 @@
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# OS and editors
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.sublime-*
+
+# Logs and temp
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# Test and browser artifacts
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# Generated Prisma client (schema and migrations stay tracked)
+.prisma/
+
+# Local databases and dumps
+*.sql.gz
+*.dump
+*.sqlite
+*.sqlite3
+postgres-data/
+pgdata/
+
+# Keys and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+credentials.json
+secrets.json

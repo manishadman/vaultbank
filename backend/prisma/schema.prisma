@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  CLEARING_CASH
+  CLEARING_INTEREST
+}
+
+enum AccountStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+}
+
+enum TxType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+  INTEREST
+}
+
+enum TxStatus {
+  COMPLETED
+  FAILED
+}
+
+enum Direction {
+  DEBIT
+  CREDIT
+}
+
+enum InterestMethod {
+  ACT_365
+}
+
+model User {
+  id            String           @id @default(cuid())
+  fullName      String
+  email         String           @unique
+  passwordHash  String
+  role          Role             @default(CUSTOMER)
+  status        UserStatus       @default(ACTIVE)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  accounts      Account[]
+  sessions      RefreshSession[]
+  notifications Notification[]
+  auditLogs     AuditLog[]       @relation("Actor")
+  initiated     Transaction[]    @relation("Initiator")
+}
+
+model Account {
+  id              String           @id @default(cuid())
+  userId          String?
+  user            User?            @relation(fields: [userId], references: [id])
+  accountNumber   String           @unique
+  accountType     AccountType
+  currency        String           @default("CAD")
+  status          AccountStatus    @default(ACTIVE)
+  /// Cached liability balance in cents. Credits increase it, debits decrease it.
+  /// Updated only in the same database transaction as ledger entries.
+  balanceMinor    BigInt           @default(0)
+  name            String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  ledgerEntries   LedgerEntry[]
+  savingsSettings SavingsSettings?
+
+  @@index([userId])
+  @@index([status])
+  @@index([accountType])
+}
+
+model Transaction {
+  id                String        @id @default(cuid())
+  type              TxType
+  status            TxStatus
+  referenceNumber   String        @unique
+  description       String
+  idempotencyKey    String?
+  requestHash       String?
+  initiatedByUserId String?
+  initiatedBy       User?         @relation("Initiator", fields: [initiatedByUserId], references: [id])
+  failureReason     String?
+  currency          String        @default("CAD")
+  amountMinor       BigInt
+  createdAt         DateTime      @default(now())
+  completedAt       DateTime?
+  entries           LedgerEntry[]
+
+  @@unique([initiatedByUserId, idempotencyKey])
+  @@index([createdAt])
+  @@index([type, status])
+  @@index([initiatedByUserId])
+}
+
+model LedgerEntry {
+  id            String      @id @default(cuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  accountId     String
+  account       Account     @relation(fields: [accountId], references: [id])
+  amountMinor   BigInt
+  direction     Direction
+  createdAt     DateTime    @default(now())
+
+  @@index([accountId, createdAt])
+  @@index([transactionId])
+}
+
+model SavingsSettings {
+  id                        String         @id @default(cuid())
+  accountId                 String         @unique
+  account                   Account        @relation(fields: [accountId], references: [id])
+  annualInterestRateBps     Int
+  interestCalculationMethod InterestMethod @default(ACT_365)
+  lastAccrualDate           DateTime?      @db.Date
+  /// Accumulated numerator. Whole cents = numerator / (365 * 10000).
+  /// Remainder stays here until posting.
+  accrualNumerator          BigInt         @default(0)
+  createdAt                 DateTime       @default(now())
+  updatedAt                 DateTime       @updatedAt
+}
+
+model InterestRateHistory {
+  id                    String   @id @default(cuid())
+  annualInterestRateBps Int
+  effectiveFrom         DateTime @db.Date
+  createdById           String?
+  note                  String?
+  createdAt             DateTime @default(now())
+}
+
+model RefreshSession {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  tokenHash    String    @unique
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  replacedById String?
+  userAgent    String?
+  ip           String?
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation("Actor", fields: [actorId], references: [id])
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([actorId])
+  @@index([targetType, targetId])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

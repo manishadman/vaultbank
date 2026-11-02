@@ -1,0 +1,158 @@
+openapi: 3.0.3
+info:
+  title: VaultBank API
+  version: 1.0.0
+  description: Educational banking simulator. All amounts are simulated CAD.
+servers:
+  - url: /api/v1
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+    MoneyRequest:
+      type: object
+      required: [accountId, amount]
+      properties:
+        accountId: { type: string }
+        amount: { type: string, example: "25.00" }
+        description: { type: string }
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200": { description: Service and database are reachable }
+  /auth/register:
+    post:
+      summary: Register a customer
+      responses:
+        "201": { description: Profile and checking account created }
+        "409": { description: Email already used }
+  /auth/login:
+    post:
+      summary: Log in
+      responses:
+        "200": { description: Access token and refresh cookie }
+        "401": { description: Generic authentication failure }
+  /auth/refresh:
+    post:
+      summary: Rotate the refresh session
+      responses:
+        "200": { description: New access token }
+  /auth/logout:
+    post:
+      summary: Revoke the refresh session
+      responses:
+        "200": { description: Signed out }
+  /auth/me:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Current user
+      responses:
+        "200": { description: Profile }
+  /accounts:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List my accounts
+      responses:
+        "200": { description: Accounts }
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Open a checking or savings account
+      responses:
+        "201": { description: Created }
+  /accounts/{id}:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Account detail
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200": { description: Account }
+  /accounts/{id}/balance:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Account balance
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200": { description: Balance in minor units }
+  /transactions:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Search my transactions
+      responses:
+        "200": { description: Page of transactions }
+  /transactions/{id}:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Transaction detail
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200": { description: Transaction and ledger entries }
+  /transactions/deposit:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Simulated deposit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MoneyRequest" }
+      responses:
+        "201": { description: Posted }
+  /transactions/withdraw:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Simulated withdrawal
+      responses:
+        "201": { description: Posted }
+        "422": { description: Insufficient funds or invalid amount }
+  /transactions/transfer:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Transfer between accounts
+      responses:
+        "201": { description: Posted }
+  /savings/calculate:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Estimate savings growth without posting
+      responses:
+        "200": { description: Estimate }
+  /admin/dashboard:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Administrator totals
+      responses:
+        "200": { description: Totals }
+        "403": { description: Customer token }
+  /admin/accounts/{id}/freeze:
+    patch:
+      security: [{ bearerAuth: [] }]
+      summary: Freeze an account
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200": { description: Frozen }
+  /admin/accounts/{id}/unfreeze:
+    patch:
+      security: [{ bearerAuth: [] }]
+      summary: Unfreeze an account
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200": { description: Active }
+  /admin/audit-logs:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Audit history
+      responses:
+        "200": { description: Audit rows }

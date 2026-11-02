@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: vaultbank
+      POSTGRES_PASSWORD: vaultbank
+      POSTGRES_DB: vaultbank
+    ports:
+      - "5432:5432"
+    volumes:
+      - vaultbank_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vaultbank -d vaultbank"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  vaultbank_pg:
