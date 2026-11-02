@@ -38,6 +38,16 @@ Point the platform health check at `GET /api/v1/health`. It runs `SELECT 1`.
 
 The refresh cookie path is `/api/v1/auth`, `SameSite=Lax`, `HttpOnly`. The browser and API must share a site configuration where that cookie is sent. A cross-site API needs a deliberate cookie and CORS design that this demo does not implement.
 
+## Render
+
+`render.yaml` describes one free web service and one Postgres database. The service builds the React app and the API serves `frontend/dist` on the same host, so the refresh cookie stays on that site.
+
+Open this link while signed in to Render, then approve the blueprint:
+
+https://render.com/deploy?repo=https://github.com/manishadman/vaultbank
+
+Render generates the two JWT secrets. `SEED_ALLOW=true` loads the demonstration customers after each deploy. The public URL is printed on the service page. Demo sign-in uses the emails in the README and the default seed passwords.
+
 ## What this document does not include
 
 There is no Dockerfile for the Node processes, no Kubernetes manifest, and no CI config. `docker-compose.yml` starts PostgreSQL only.

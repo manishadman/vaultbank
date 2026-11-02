@@ -22,7 +22,7 @@ export const env = {
   isTest: nodeEnv === 'test',
   port: Number(process.env.PORT || 4000),
   databaseUrl: required('DATABASE_URL', isProd ? undefined : 'postgresql://mani@localhost:5432/vaultbank'),
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  corsOrigin: process.env.CORS_ORIGIN || process.env.RENDER_EXTERNAL_URL || 'http://localhost:5173',
   cookieSecure: process.env.COOKIE_SECURE === 'true' || isProd,
   jwtAccessSecret: required(
     'JWT_ACCESS_SECRET',
