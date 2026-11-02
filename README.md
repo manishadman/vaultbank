@@ -8,18 +8,22 @@ The interesting engineering problem is keeping a customer balance cache consiste
 
 ![Customer dashboard](docs/screenshots/dashboard-desktop.png)
 
+## Live Website URL
+
+https://vaultbank-0h23.onrender.com
+
 ## Screenshots
 
-| Landing | Sign in |
-| --- | --- |
+| Landing                                               | Sign in                                           |
+| ----------------------------------------------------- | ------------------------------------------------- |
 | ![Landing page](docs/screenshots/landing-desktop.png) | ![Login page](docs/screenshots/login-desktop.png) |
 
-| Accounts | Deposit | Transfer |
-| --- | --- | --- |
+| Accounts                                           | Deposit                                          | Transfer                                           |
+| -------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------- |
 | ![Accounts](docs/screenshots/accounts-desktop.png) | ![Deposit](docs/screenshots/deposit-desktop.png) | ![Transfer](docs/screenshots/transfer-desktop.png) |
 
-| Activity | Savings | Administration |
-| --- | --- | --- |
+| Activity                                                   | Savings                                          | Administration                               |
+| ---------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------- |
 | ![Transactions](docs/screenshots/transactions-desktop.png) | ![Savings](docs/screenshots/savings-desktop.png) | ![Admin](docs/screenshots/admin-desktop.png) |
 
 Mobile dashboard, open navigation, and activity:
@@ -43,17 +47,17 @@ Verified in this repository:
 
 ## Technology stack
 
-| Area | Choice |
-| --- | --- |
-| Frontend | React 19, Vite, React Router, Axios, React Hook Form, Zod, Recharts, Lucide |
-| Styling | Tailwind CSS |
-| Backend | Node.js 20+, Express |
-| Database | PostgreSQL 16, Prisma |
+| Area           | Choice                                                                           |
+| -------------- | -------------------------------------------------------------------------------- |
+| Frontend       | React 19, Vite, React Router, Axios, React Hook Form, Zod, Recharts, Lucide      |
+| Styling        | Tailwind CSS                                                                     |
+| Backend        | Node.js 20+, Express                                                             |
+| Database       | PostgreSQL 16, Prisma                                                            |
 | Authentication | bcrypt passwords, JWT access tokens, hashed refresh sessions in HttpOnly cookies |
-| API protection | Helmet, CORS, Zod, `express-rate-limit` |
-| Statements | CSV in process, PDFKit |
-| Tests | Mocha, Chai, Supertest; Vitest and React Testing Library; Playwright smoke test |
-| Local database | Docker Compose optional |
+| API protection | Helmet, CORS, Zod, `express-rate-limit`                                          |
+| Statements     | CSV in process, PDFKit                                                           |
+| Tests          | Mocha, Chai, Supertest; Vitest and React Testing Library; Playwright smoke test  |
+| Local database | Docker Compose optional                                                          |
 
 ## System architecture
 
@@ -96,12 +100,12 @@ This is not production banking-grade or financially regulated software. Limits a
 
 ## Financial transaction handling
 
-| Movement | Debit | Credit |
-| --- | --- | --- |
-| Deposit | Cash clearing | Customer account |
-| Withdrawal | Customer account | Cash clearing |
-| Transfer | Source account | Destination account |
-| Posted interest | Interest clearing | Savings account |
+| Movement        | Debit             | Credit              |
+| --------------- | ----------------- | ------------------- |
+| Deposit         | Cash clearing     | Customer account    |
+| Withdrawal      | Customer account  | Cash clearing       |
+| Transfer        | Source account    | Destination account |
+| Posted interest | Interest clearing | Savings account     |
 
 `postTransaction` locks the involved accounts with `SELECT … FOR UPDATE` in account-id order, checks status under the lock, writes the transaction and balanced ledger rows, then updates balances. A customer debit also requires `balanceMinor >= amount` in the `UPDATE`. PostgreSQL rolls the whole unit back on failure.
 
@@ -132,18 +136,18 @@ npm run dev
 
 The web app is at `http://localhost:5173`. The API is at `http://localhost:4000`. Health check: `GET /api/v1/health`.
 
-| Variable | Purpose |
-| --- | --- |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `TEST_DATABASE_URL` | Isolated database for API tests |
-| `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | Signing secrets |
-| `ACCESS_TOKEN_TTL` | Access token lifetime, default `15m` |
-| `REFRESH_TOKEN_DAYS` | Refresh session lifetime |
-| `CORS_ORIGIN` | Allowed browser origin |
-| `COOKIE_SECURE` | Set `true` behind HTTPS |
-| `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | Development administrator |
-| `SEED_DEMO_PASSWORD` | Shared development customer password |
-| `VITE_API_URL` | Frontend API base, default `/api/v1` |
+| Variable                                   | Purpose                              |
+| ------------------------------------------ | ------------------------------------ |
+| `DATABASE_URL`                             | PostgreSQL connection string         |
+| `TEST_DATABASE_URL`                        | Isolated database for API tests      |
+| `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | Signing secrets                      |
+| `ACCESS_TOKEN_TTL`                         | Access token lifetime, default `15m` |
+| `REFRESH_TOKEN_DAYS`                       | Refresh session lifetime             |
+| `CORS_ORIGIN`                              | Allowed browser origin               |
+| `COOKIE_SECURE`                            | Set `true` behind HTTPS              |
+| `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | Development administrator            |
+| `SEED_DEMO_PASSWORD`                       | Shared development customer password |
+| `VITE_API_URL`                             | Frontend API base, default `/api/v1` |
 
 Never commit `backend/.env`.
 
@@ -214,7 +218,7 @@ API tests use `TEST_DATABASE_URL` and truncate that database. They cover registr
 
 ## License
 
-No license file is in the repository yet. MIT is a reasonable choice for a public portfolio. A license file will be added only after you approve one.
+No license file is in the repository yet. MIT is a reasonable choice for a public portfolio.
 
 ## Documentation
 
