@@ -10,7 +10,8 @@ import { useToast } from '../context/ToastContext.jsx';
 
 function MoneyFlow({ title, kind }) {
   const toast = useToast();
-  const accounts = useAsync(() => api.get('/accounts').then((response) => response.data.items), []);
+  const [version, setVersion] = useState(0);
+  const accounts = useAsync(() => api.get('/accounts').then((response) => response.data.items), [version]);
   const [draft, setDraft] = useState(null);
   const [receipt, setReceipt] = useState(null);
   const schema = z.object({
@@ -25,6 +26,7 @@ function MoneyFlow({ title, kind }) {
       const response = await api.post(path, draft, { headers: { 'Idempotency-Key': newIdempotencyKey() } });
       setReceipt(response.data.transaction);
       setDraft(null);
+      setVersion((value) => value + 1);
       toast.push('Simulated transaction posted.');
     } catch (error) {
       toast.push(errorMessage(error), 'error');
@@ -35,6 +37,7 @@ function MoneyFlow({ title, kind }) {
     <div className="mx-auto max-w-xl space-y-4">
       <DemoBanner />
       <h1 className="text-3xl font-semibold">{title}</h1>
+      {accounts.error ? <p className="text-sm text-red-700 dark:text-red-300">{accounts.error}</p> : null}
       <Card>
         <form className="space-y-4" onSubmit={handleSubmit(setDraft)} noValidate>
           <Field label="Account" error={formState.errors.accountId?.message}>
@@ -85,7 +88,8 @@ export function WithdrawPage() {
 
 export function TransferPage() {
   const toast = useToast();
-  const accounts = useAsync(() => api.get('/accounts').then((response) => response.data.items), []);
+  const [version, setVersion] = useState(0);
+  const accounts = useAsync(() => api.get('/accounts').then((response) => response.data.items), [version]);
   const [draft, setDraft] = useState(null);
   const [receipt, setReceipt] = useState(null);
   const schema = z.object({
@@ -100,6 +104,7 @@ export function TransferPage() {
       const response = await api.post('/transactions/transfer', draft, { headers: { 'Idempotency-Key': newIdempotencyKey() } });
       setReceipt(response.data.transaction);
       setDraft(null);
+      setVersion((value) => value + 1);
       toast.push('Transfer posted.');
     } catch (error) {
       toast.push(errorMessage(error), 'error');
@@ -110,6 +115,7 @@ export function TransferPage() {
     <div className="mx-auto max-w-xl space-y-4">
       <DemoBanner />
       <h1 className="text-3xl font-semibold">Transfer</h1>
+      {accounts.error ? <p className="text-sm text-red-700 dark:text-red-300">{accounts.error}</p> : null}
       <Card>
         <form className="space-y-4" onSubmit={handleSubmit(setDraft)} noValidate>
           <Field label="From" error={formState.errors.sourceAccountId?.message}>

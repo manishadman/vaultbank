@@ -15,7 +15,10 @@ export function errorHandler(error, req, res, _next) {
   const body = {
     error: {
       code: error.code || 'INTERNAL',
-      message: status >= 500 ? 'Something went wrong. Please try again.' : error.message,
+      message:
+        status >= 500 && error.code !== 'CLEARING_MISSING'
+          ? 'Something went wrong. Please try again.'
+          : error.message,
       fields: error.extra?.fields,
       transaction: error.extra?.transaction,
     },
